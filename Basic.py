@@ -32,6 +32,7 @@ import cv2
 
 img = cv2.imread("blasp.jpg")
 
+
 # lab = cv2.cvtColor(img,cv2.COLOR_RGB2LAB) : RGB -> LAB formülü
 # hsi = cv2.cvtColor(img,cv2.COLOR_RGB2HSV) : RGB -> HSI formülü
  
@@ -45,7 +46,8 @@ np_lin = np.where(
     ((rgb + 0.055) / 1.055) ** 2.4 # ilk ifade yanlis olursa burasi calisir
 )
 
-
+cv2.imshow("bes",np_lin)
+cv2.waitKey(0)
 # LAB dönüşümü için 3. işlem
 
 

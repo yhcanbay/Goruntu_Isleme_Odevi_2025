@@ -7,7 +7,7 @@ tabanlı nesne segmentasyonu.
 1. Bir renkli görüntüyü RGB'den HSV ve LAB renk uzaylarına dönüştürün.
 
 
-
+UCBES
 2. Belirli bir renge sahip (örneğin, kırmızı bir araba, yeşil yapraklar)
 nesneleri bölütlemek (segmentasyon) için HSV uzayında eşikleme
 (thresholding) yapın. 

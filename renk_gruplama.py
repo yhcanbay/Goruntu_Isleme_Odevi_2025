@@ -14,7 +14,7 @@ def delta_e_cie76(lab1, lab2):
     return np.sqrt(np.sum((np.array(lab1) - np.array(lab2)) ** 2))
 
 
-def dominant_renkler_bul(goruntu: np.ndarray, k: int = 5) -> np.ndarray:
+def dominant_renkler_bul(goruntu: np.ndarray, k: int = 8) -> np.ndarray:
     """
     K-Means ile görüntüdeki baskın renkleri bulur.
     

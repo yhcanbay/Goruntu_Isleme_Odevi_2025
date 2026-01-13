@@ -46,27 +46,10 @@ def gorev1_renk_uzayi_donusumleri(goruntu: np.ndarray, sonuclar_klasoru: str):
     print(f"  - a (Green-Red) aralığı: {a.min()} - {a.max()}")
     print(f"  - b (Blue-Yellow) aralığı: {b.min()} - {b.max()}")
     
-    # Görselleştirme için kanalları birleştir
-    hsv_vis = cv2.merge([
-        cv2.applyColorMap(h, cv2.COLORMAP_HSV),
-        cv2.applyColorMap(s, cv2.COLORMAP_BONE),
-        cv2.applyColorMap(v, cv2.COLORMAP_BONE)
-    ])
-    
-    lab_vis = cv2.merge([
-        cv2.applyColorMap(l, cv2.COLORMAP_BONE),
-        cv2.applyColorMap(a, cv2.COLORMAP_JET),
-        cv2.applyColorMap(b, cv2.COLORMAP_JET)
-    ])
-    
-    # Sonuçları kaydet
+    # Sonuçları kaydet (sadece ekranda gösterilenleri)
     cv2.imwrite(sonuclar_klasoru + "/1_orijinal.png", goruntu)
-    cv2.imwrite(sonuclar_klasoru + "/1_hsv_h_kanal.png", h)
-    cv2.imwrite(sonuclar_klasoru + "/1_hsv_s_kanal.png", s)
-    cv2.imwrite(sonuclar_klasoru + "/1_hsv_v_kanal.png", v)
-    cv2.imwrite(sonuclar_klasoru + "/1_lab_l_kanal.png", l)
-    cv2.imwrite(sonuclar_klasoru + "/1_lab_a_kanal.png", a)
-    cv2.imwrite(sonuclar_klasoru + "/1_lab_b_kanal.png", b)
+    cv2.imwrite(sonuclar_klasoru + "/1_hsv.png", hsv)
+    cv2.imwrite(sonuclar_klasoru + "/1_lab.png", lab)
     
     print(f"✓ Sonuçlar '{sonuclar_klasoru}' klasörüne kaydedildi")
     
@@ -76,8 +59,6 @@ def gorev1_renk_uzayi_donusumleri(goruntu: np.ndarray, sonuclar_klasoru: str):
     cv2.imshow('LAB Goruntu', lab)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    
-    return {'hsv': hsv, 'lab': lab, 'h': h, 's': s, 'v': v, 'l': l, 'a': a, 'b': b}
 
 
 def gorev2_hsv_segmentasyon(goruntu: np.ndarray, sonuclar_klasoru: str):
@@ -115,10 +96,6 @@ def gorev2_hsv_segmentasyon(goruntu: np.ndarray, sonuclar_klasoru: str):
         # Sonuçları sakla
         maskeler[renk] = maske
         segmente_nesneler[renk] = segmente_nesne
-        
-        # Dosyalara kaydet
-        cv2.imwrite(sonuclar_klasoru + f"/2_{renk}_maske.png", maske)
-        cv2.imwrite(sonuclar_klasoru + f"/2_{renk}_segmente.png", segmente_nesne)
     
     print(f"\n✓ Tüm segmentasyon sonuçları kaydedildi")
     
@@ -141,7 +118,8 @@ def gorev2_hsv_segmentasyon(goruntu: np.ndarray, sonuclar_klasoru: str):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
-    return maskeler, segmente_nesneler
+    return maskeler
+
 
 
 def gorev3_delta_e_gruplama(goruntu: np.ndarray, sonuclar_klasoru: str):
@@ -162,11 +140,9 @@ def gorev3_delta_e_gruplama(goruntu: np.ndarray, sonuclar_klasoru: str):
     
     # Delta E mesafelerini hesapla
     print(f"\n✓ Renkler arası Delta E (CIE76) mesafeleri:")
-    delta_e_matrisi = []
     for i in range(len(dominant)):
         for j in range(i+1, len(dominant)):
             de = delta_e_cie76(dominant[i], dominant[j])
-            delta_e_matrisi.append((i+1, j+1, de))
             if de < 30:  # Benzer renkler
                 print(f"  Renk {i+1} ↔ Renk {j+1}: ΔE = {de:6.2f} ★ (Benzer)")
             else:
@@ -198,7 +174,7 @@ def gorev3_delta_e_gruplama(goruntu: np.ndarray, sonuclar_klasoru: str):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
-    return dominant, gruplar
+
 
 
 def gorev4_morfolojik_iyilestirme(goruntu: np.ndarray, maskeler: dict, sonuclar_klasoru: str):
@@ -246,13 +222,6 @@ def gorev4_morfolojik_iyilestirme(goruntu: np.ndarray, maskeler: dict, sonuclar_
         maskeler_iyilestirilmis[renk] = maske_iyilestirilmis
         nesneler_iyilestirilmis[renk] = nesne_iyilestirilmis
         
-        # Dosyalara kaydet
-        cv2.imwrite(sonuclar_klasoru + f"/4_{renk}_maske_ham.png", maske)
-        cv2.imwrite(sonuclar_klasoru + f"/4_{renk}_maske_acma.png", maske_acma)
-        cv2.imwrite(sonuclar_klasoru + f"/4_{renk}_maske_kapama.png", maske_kapama)
-        cv2.imwrite(sonuclar_klasoru + f"/4_{renk}_maske_iyilestirilmis.png", maske_iyilestirilmis)
-        cv2.imwrite(sonuclar_klasoru + f"/4_{renk}_nesne_iyilestirilmis.png", nesne_iyilestirilmis)
-        
         # Tüm aşamaları tek görüntüde birleştir (2 satır x 3 sütun)
         # Üst satır: Ham, Açma, Kapama maskeleri
         ust_satir = np.hstack([
@@ -286,7 +255,7 @@ def gorev4_morfolojik_iyilestirme(goruntu: np.ndarray, maskeler: dict, sonuclar_
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
-    return maskeler_iyilestirilmis, nesneler_iyilestirilmis
+
 
 
 def ana():
@@ -313,16 +282,16 @@ def ana():
     print(f"✓ Sonuçlar klasörü: {sonuclar_klasoru}/")
     
     # GÖREV 1: Renk uzayı dönüşümleri
-    uzaylar = gorev1_renk_uzayi_donusumleri(goruntu, sonuclar_klasoru)
+    gorev1_renk_uzayi_donusumleri(goruntu, sonuclar_klasoru)
     
     # GÖREV 2: HSV segmentasyon
-    maskeler, segmente_nesneler = gorev2_hsv_segmentasyon(goruntu, sonuclar_klasoru)
+    maskeler = gorev2_hsv_segmentasyon(goruntu, sonuclar_klasoru)
     
     # GÖREV 3: Delta E renk gruplama
-    dominant, gruplar = gorev3_delta_e_gruplama(goruntu, sonuclar_klasoru)
+    gorev3_delta_e_gruplama(goruntu, sonuclar_klasoru)
     
     # GÖREV 4: Morfolojik iyileştirme (tüm renkler için)
-    maskeler_iyi, nesneler_iyi = gorev4_morfolojik_iyilestirme(goruntu, maskeler, sonuclar_klasoru)
+    gorev4_morfolojik_iyilestirme(goruntu, maskeler, sonuclar_klasoru)
     
     # Özet rapor
     print("\n" + "="*70)

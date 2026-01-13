@@ -8,7 +8,7 @@ tabanlı nesne segmentasyonu.
 
 
 UCBES
-2. Belirli bir renge sahip (örneğin, kırmızı bir araba, yeşil yapraklar)
+2.  Belirlibir renge sahip (örneğin, kırmızı bir araba, yeşil yapraklar)
 nesneleri bölütlemek (segmentasyon) için HSV uzayında eşikleme
 (thresholding) yapın. 
 
@@ -30,27 +30,42 @@ gruplayın.
 import numpy as np
 import cv2
 
-img = cv2.imread("blasp.jpg")
+img = cv2.imread("araba.jpeg")    
+
+# 1 - ilk kısım yapıldı
+lab = cv2.cvtColor(img,cv2.COLOR_RGB2LAB) 
+hsv = cv2.cvtColor(img,cv2.COLOR_RGB2HSV) 
 
 
-# lab = cv2.cvtColor(img,cv2.COLOR_RGB2LAB) : RGB -> LAB formülü
-# hsi = cv2.cvtColor(img,cv2.COLOR_RGB2HSV) : RGB -> HSI formülü
- 
-# LAB dönüşümü için 1. işlem
-rgb = img / 255
+cv2.imshow("1",img)
+cv2.imshow("2",hsv)
 
-# LAB dönüşümü için 2. işlem
-np_lin = np.where(
-    rgb <= 0.04045,
-    rgb / 12.92, # yukarıdaki ifade doğru olursa burası calisir
-    ((rgb + 0.055) / 1.055) ** 2.4 # ilk ifade yanlis olursa burasi calisir
-)
-
-cv2.imshow("bes",np_lin)
 cv2.waitKey(0)
-# LAB dönüşümü için 3. işlem
 
 
 
 
-# LAB dönüşümü için 4. işlem
+print("\n=== OTOMATİK RENK SEGMENTASYONU (OTSU) ===")
+
+# S (Saturation) kanalını al - Renklilik bilgisi buradadır
+# Gri/beyaz/siyah alanların doygunluğu düşük, renkli nesnelerin yüksektir
+s_channel = hsv[:, :, 1]
+
+# Otsu eşikleme ile otomatik threshold belirle ve maske oluştur
+# cv2.THRESH_BINARY + cv2.THRESH_OTSU kullanarak en uygun eşik değerini bulur
+ret, mask = cv2.threshold(s_channel, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+print(f"Otsu Metodu ile hesaplanan eşik değeri: {ret}")
+print("Segmentasyon tamamlandı.")
+
+# Maskeyi kullanarak orijinal görüntüyü bölütle (Maskeleme)
+segmented_img = cv2.bitwise_and(img, img, mask=mask)
+
+# Sonuçları göster
+cv2.imshow("S Kanali (Doygunluk)", s_channel)
+cv2.imshow("Otsu Maskesi", mask)
+cv2.imshow("Otomatik Segmentasyon Sonucu", segmented_img)
+
+print("Sonuçlar gösteriliyor. Programı kapatmak için herhangi bir tuşa basın...")
+cv2.waitKey(0)
+cv2.destroyAllWindows()

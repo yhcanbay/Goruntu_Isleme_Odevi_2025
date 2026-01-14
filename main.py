@@ -109,6 +109,9 @@ def gorev4_morfolojik_iyilestirme(goruntu: np.ndarray, maskeler: dict):
         # İyileştirilmiş maskeyi uyguluyorum
         nesne_iyilestirilmis = maskeyi_uygula(goruntu, maske_iyilestirilmis)
         
+        # Ham maskeyi de uyguluyorum (karşılaştırma için)
+        nesne_ham = maskeyi_uygula(goruntu, maske)
+        
         # Tüm aşamaları gösteriyorum (2x3 grid)
         ust_satir = np.hstack([
             cv2.cvtColor(maske, cv2.COLOR_GRAY2BGR),
@@ -116,10 +119,11 @@ def gorev4_morfolojik_iyilestirme(goruntu: np.ndarray, maskeler: dict):
             cv2.cvtColor(maske_kapama, cv2.COLOR_GRAY2BGR)
         ])
         
+        # Alt satır: Önce-sonra karşılaştırması
         alt_satir = np.hstack([
             cv2.cvtColor(maske_iyilestirilmis, cv2.COLOR_GRAY2BGR),
-            nesne_iyilestirilmis,
-            nesne_iyilestirilmis
+            nesne_ham,  # İyileştirme öncesi
+            nesne_iyilestirilmis  # İyileştirme sonrası
         ])
         
         birlesik_goruntu = np.vstack([ust_satir, alt_satir])
